@@ -720,6 +720,34 @@ files:
         """ Reports success """
         print("#educational_plugin test OK")
   learner_created: false
+- name: hypercar/tickets/templates/menu.html
+  visible: true
+  text: |-
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Menu</title>
+    </head>
+    <body>
+        <li>
+            <a target="_blank" href="/get_ticket/change_oil">Change oil</a>
+        </li>
+        <li>
+            <a target="_blank" href="/get_ticket/inflate_tires">Inflate tires</a>
+        </li>
+        <li>
+            <a target="_blank" href="/get_ticket/diagnostic">Get diagnostic test</a>
+        </li>
+    </body>
+    </html>
+  learner_created: true
+- name: hypercar/tickets/templates/your_ticket.html
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/85/stages/472/implement#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Tue, 04 May 2021 09:11:36 UTC
 record: -1

@@ -1,0 +1,14 @@
+type: code
+files:
+- name: main.py
+  visible: true
+  text: |-
+    reversed_queue = deque()
+    ...
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/8931#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Tue, 04 May 2021 07:46:56 UTC
+record: -1
