@@ -1,0 +1,69 @@
+<html>
+ <head></head>
+ <body>
+  <p>Making a site, we want to isolate the processing of requests from the final representation to the client, so that we can update each part independently. We receive a request, do the hard work, and pass the data further to prepare HTML pages. And if we want to rework our HTML templates, the processing requests may stay the same. One thing is still missing: how to bind these two parts together?</p> 
+  <h2>Render</h2> 
+  <p>A not-so-famous writer Jack Torrance started working on his new book. He wants to publish this book online with the table of contents on the main page and each chapter on a separate page. He sends us the first draft of his story, so we start making a site for this book:</p> 
+  <pre><code class="language-python">book = {
+    'Chapter 1': 'All work and no play makes Jack a dull boy...',
+    'Chapter 2': 'All work and no play makes Jack a dull boy...',
+    'Chapter 3': 'All work and no play makes Jack a dull boy...',
+    'Chapter 4': 'All work and no play makes Jack a dull boy...',
+}</code></pre> 
+  <p>This novel seems a little bit strange, but what do we know about modern literature, so we create an HTML template for the main page with the contents of the book:</p> 
+  <pre><code class="language-django">&lt;h2&gt; Shining &lt;/h2&gt;
+&lt;ul&gt;
+  {% for chapter in book %}
+  &lt;li&gt;
+    &lt;a target="_blank" href="/chapter/{{ forloop.counter }}"&gt;Chapter {{ forloop.counter }}&lt;/a&gt;
+  &lt;/li&gt;
+  {% endfor %}
+&lt;/ul&gt;</code></pre> 
+  <p>Each item of an unordered list is a link to a chapter page, so the users can comfortably read each chapter on a separate HTML page. We name our application "<em>book</em>" and save this template to the "<em>book/templates/book/contents.html</em>" file.</p> 
+  <p>To return the user to the contents page, we need to implement an HTTP handler with the <code class="language-python">get</code> method:</p> 
+  <pre><code class="language-python">from django.views import View
+from django.shortcuts import render
+
+
+class MainPageView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'book/contents.html', context={'book': book})</code></pre> 
+  <p>All that we do is call the <code class="language-python">render</code> function and pass to it the template path and a <code class="language-python">context</code> dictionary with the book. All the variables from the <code class="language-python">context</code> will be available in the template now, and we can access them by the key from a dictionary.</p> 
+  <p></p>
+  <div class="alert alert-warning">
+    By default, Django is looking for templates in all of your "
+   <em>&lt;application_name&gt;/templates</em>" directories, so we do not include "
+   <em>book/templates</em>" in the template path, because Django will do it for us. 
+  </div>
+  <p></p> 
+  <p style="text-align: center;"><img alt="" src="https://ucarecdn.com/11c4a71d-963d-40b6-9953-4cb108542466/"></p> 
+  <p>To serve this handle on the route "<em>/contents</em>", add <code class="language-python">path('contents', book.views.MainPageView.as_view())</code> to the <code class="language-python">urlpatterns</code> list in the <em>"&lt;project_name&gt;/urls.py"</em> module.</p> 
+  <h2>TemplateView</h2> 
+  <p>In the example above, we define the <code class="language-python">get</code> method. This method seems idle because it delegates all the work to the <code class="language-python">render</code> function. How can we omit this duplication of responsibilities?</p> 
+  <p>This time we have a new template in the "<em>book/templates/book/chapter.html</em>" file to render a single chapter :</p> 
+  <pre><code class="language-django">&lt;h2&gt; Chapter {{ n_chapter }} &lt;/h2&gt;
+&lt;ul&gt;
+  {{ content }}
+&lt;/ul&gt;</code></pre> 
+  <p>Django contains many other classes with predefined code for different use cases. We define a new handler to serve the chapter content and inherit it from <code class="language-python">django.views.generic.base.TemplateView</code>, because we have a template and some data to pass to it.</p> 
+  <pre><code class="language-python">from django.views.generic.base import TemplateView
+
+
+class ChapterView(TemplateView):
+    template_name = 'book/chapter.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs) 
+        n_chapter = kwargs['n_chapter']
+        context['n_chapter'] = n_chapter
+        context['content'] = book['Chapter ' + n_chapter]
+        return context</code></pre> 
+  <p>Most often, we create one template per page, so we save it as the <code class="language-python">template_name</code> attribute of our class. We don't need to define the<em> </em><code class="language-python">get</code> method: we fulfill the context and return it from the <code class="language-python">get_context_data</code> call. It looks like we are working directly with a template and don't think about the routines of processing the request.</p> 
+  <h2>Routing pattern</h2> 
+  <p>The last thing to do to make our handler work is define a correct pattern for the router. We expect to receive the variable <code class="language-python">n_chapter</code> in the <code class="language-python">**kwargs</code> argument of the method, so we define our URL path with the help of a regular expression:</p> 
+  <pre><code class="language-python">re_path('chapter/(?P&lt;n_chapter&gt;\d+)', book.views.ChapterView.as_view())</code></pre> 
+  <p>We again add it to the <code class="language-python">urlpatterns</code>. The part <code class="language-python">n_chapter</code> should match the variable name we expect to receive in the <code class="language-python">**kwargs</code> argument of the <code class="language-python">get_context_data</code> method. Get the result page:</p> 
+  <p style="text-align: center;"><img alt="" src="https://ucarecdn.com/83254773-28f9-4e7b-a875-7e520c80678e/"></p> 
+  <p>Here, our work is finished for now. We'll eagerly expect more chapters from the writer. Meanwhile, all theory and no practice makes Jack a dull boy: let's play with some practical tasks.</p>
+ </body>
+</html>
