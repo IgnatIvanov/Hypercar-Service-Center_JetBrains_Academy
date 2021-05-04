@@ -2,27 +2,17 @@ from django.views import View
 from django.http.response import HttpResponse
 from django.shortcuts import render
 from collections import deque
+from django.shortcuts import redirect
 
 
-# line_of_cars = deque()
 for_change_oil_line = deque()
 for_inflate_tires_line = deque()
 for_diagnostic_line = deque()
 next_number = 1
+next_ticket = 0
 
 
 def get_estimated_time(service):
-    # n_change_oil = 0
-    # n_inflate_tires = 0
-    # n_diagnostic = 0
-    # for car in line_of_cars:
-    #     if 'oil' in car:
-    #         n_change_oil += 1
-    #     elif 'tires' in car:
-    #         n_inflate_tires += 1
-    #     elif 'diagnostic' in car:
-    #         n_diagnostic += 1
-
     minutes = 0
     minutes += len(for_change_oil_line) * 2
     if service == 'change_oil':
@@ -90,3 +80,24 @@ class ProcessingView(View):
                           'n_diagnostic': len(for_diagnostic_line)
                       }
                       )
+
+    def post(self, request, *args, **kwargs):
+        global next_ticket
+        if len(for_change_oil_line):
+            next_ticket = for_change_oil_line.popleft()
+        elif len(for_inflate_tires_line):
+            next_ticket = for_inflate_tires_line.popleft()
+        elif len(for_diagnostic_line):
+            next_ticket = for_diagnostic_line.popleft()
+        else:
+            next_ticket = 0
+        return redirect('/next/')
+
+
+class NextTicketView(View):
+    def get(self, request, *args, **kwargs):
+        global next_ticket
+        if next_ticket > 0:
+            return render(request, 'next.html', context={'next_ticket': next_ticket})
+        else:
+            return render(request, 'next.html')

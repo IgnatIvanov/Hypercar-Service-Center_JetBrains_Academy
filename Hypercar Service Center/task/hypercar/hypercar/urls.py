@@ -15,18 +15,14 @@ Including another URLconf
 """
 from django.urls import path
 from django.urls import re_path
-from django.views.generic import RedirectView
-# from views import WelcomeView
-# from views import MenuView
-# from views import ChangeOilTicketView
-# from views import InflateTiresTicketView
-# from views import DiagnosticTicketView
 from tickets.views import WelcomeView
 from tickets.views import MenuView
 from tickets.views import ChangeOilTicketView
 from tickets.views import InflateTiresTicketView
 from tickets.views import DiagnosticTicketView
 from tickets.views import ProcessingView
+from tickets.views import NextTicketView
+
 
 
 
@@ -36,6 +32,6 @@ urlpatterns = [
     path('get_ticket/change_oil/', ChangeOilTicketView.as_view()),
     path('get_ticket/inflate_tires/', InflateTiresTicketView.as_view()),
     path('get_ticket/diagnostic/', DiagnosticTicketView.as_view()),
-    # path('processing/', ProcessingView.as_view())
-    re_path('processing/?', ProcessingView.as_view())
+    re_path('processing/?', ProcessingView.as_view()),
+    re_path('next/?', NextTicketView.as_view())
 ]
